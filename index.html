@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Bíblico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+       .container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+        }
+       .pergunta {
+            font-size: 18px;
+            margin: 25px 0;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+       .alternativas label {
+            display: block;
+            background: #f8f9fa;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            border: 2px solid #e9ecef;
+        }
+       .alternativas label:hover {
+            background: #e9ecef;
+        }
+       .alternativas input {
+            margin-right: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #videoContainer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #videoContainer video {
+            max-width: 90%;
+            max-height: 70%;
+            border-radius: 12px;
+        }
+       .fechar {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz Bíblico</h1>
+        <div id="quiz">
+            <p class="pergunta" id="textoPergunta">Carregando...</p>
+            <div class="alternativas" id="alternativas"></div>
+            <button onclick="proximaPergunta()">Próximo</button>
+        </div>
+    </div>
+
+    <!-- Popup do Vídeo -->
+    <div id="videoContainer">
+        <button class="fechar" onclick="fecharVideo()">✕</button>
+        <video id="videoResposta" controls playsinline>
+            <source src="video-resposta.mp4" type="video/mp4">
+        </video>
+        <p style="color:white; margin-top:15px;">Assista e depois continue</p>
+    </div>
+
+    <script>
+        // 1. EDITE SUAS PERGUNTAS AQUI
+        const perguntas = [
+            {
+                pergunta: "Quem construiu a arca?",
+                alternativas: ["A) Moisés", "B) Noé", "C) Abraão"],
+                video: "video-noe.mp4" // vídeo pra essa pergunta
+            },
+            {
+                pergunta: "Quantos dias durou o dilúvio?",
+                alternativas: ["A) 7 dias", "B) 40 dias", "C) 100 dias"],
+                video: "video-diluvio.mp4"
+            },
+            {
+                pergunta: "Quem foi jogado na cova dos leões?",
+                alternativas: ["A) Davi", "B) Daniel", "C) José"],
+                video: "video-daniel.mp4"
+            }
+        ];
+
+        let perguntaAtual = 0;
+
+        function carregarPergunta() {
+            const p = perguntas[perguntaAtual];
+            document.getElementById('textoPergunta').innerText = p.pergunta;
+
+            const divAlternativas = document.getElementById('alternativas');
+            divAlternativas.innerHTML = '';
+
+            p.alternativas.forEach((alt, index) => {
+                divAlternativas.innerHTML += `
+                    <label>
+                        <input type="radio" name="resposta" value="${index}">
+                        ${alt}
+                    </label>
+                `;
+            });
+        }
+
+        function proximaPergunta() {
+            const selecionada = document.querySelector('input[name="resposta"]:checked');
+            if (!selecionada) {
+                alert("Escolha uma alternativa!");
+                return;
+            }
+
+            // Mostra o vídeo da pergunta atual
+            abrirVideo(perguntas[perguntaAtual].video);
+        }
+
+        function abrirVideo(srcVideo) {
+            const container = document.getElementById('videoContainer');
+            const video = document.getElementById('videoResposta');
+            video.src = srcVideo; // troca o vídeo
+            container.style.display = 'flex';
+            video.play();
+
+            // Quando o vídeo acabar, vai pra próxima pergunta
+            video.onended = function() {
+                fecharVideo();
+                perguntaAtual++;
+                if (perguntaAtual < perguntas.length) {
+                    carregarPergunta();
+                } else {
+                    document.getElementById('quiz').innerHTML = '<h2>Fim do Quiz!</h2><p>Parabéns por chegar até aqui.</p>';
+                }
+            };
+        }
+
+        function fecharVideo() {
+            const container = document.getElementById('videoContainer');
+            const video = document.getElementById('videoResposta');
+            video.pause();
+            container.style.display = 'none';
+        }
+
+        // Inicia o quiz
+        carregarPergunta();
+    </script>
+</body>
+</html>
